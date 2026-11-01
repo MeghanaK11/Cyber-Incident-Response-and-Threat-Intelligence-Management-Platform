@@ -110,3 +110,60 @@ export const incidentListSchema = z.object({
 });
 
 export type IncidentListParams = z.infer<typeof incidentListSchema>;
+
+// --- Assets -------------------------------------------------------------------
+
+const hostname = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .min(1)
+  .max(253)
+  .regex(/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/, "Use letters, digits, dots and hyphens");
+
+const ipAddress = z
+  .string()
+  .trim()
+  .refine((v) => /^(\d{1,3}\.){3}\d{1,3}$/.test(v) || /^[0-9a-fA-F:]+$/.test(v), "Not a valid IP address");
+
+export const assetCreateSchema = z.object({
+  hostname,
+  ip_address: ipAddress.nullable().optional(),
+  asset_type: z.enum(ASSET_TYPES),
+  operating_system: z.string().trim().max(60).nullable().optional(),
+  department: z.string().trim().min(2).max(60),
+  criticality: z.coerce.number().int().min(1).max(5),
+  is_internet_facing: z.boolean().default(false),
+});
+
+export const assetUpdateSchema = assetCreateSchema
+  .partial()
+  .refine((v) => Object.keys(v).length > 0, "Nothing to update");
+
+// --- Playbooks -----------------------------------------------------------------
+
+export const playbookStepSchema = z.object({
+  title: z.string().trim().min(3).max(150),
+  instructions: z.string().trim().min(5).max(5000),
+  expected_minutes: z.coerce.number().int().min(1).max(10080),
+});
+
+export const playbookCreateSchema = z.object({
+  name: z.string().trim().min(3).max(120),
+  category: z.enum(CATEGORIES).nullable(),
+  description: z.string().trim().min(10).max(5000),
+  steps: z.array(playbookStepSchema).min(1, "Add at least one step").max(30),
+});
+
+export const playbookUpdateSchema = z
+  .object({
+    name: z.string().trim().min(3).max(120).optional(),
+    category: z.enum(CATEGORIES).nullable().optional(),
+    description: z.string().trim().min(10).max(5000).optional(),
+    is_active: z.boolean().optional(),
+  })
+  .refine((v) => Object.keys(v).length > 0, "Nothing to update");
+
+export const playbookStepsSchema = z.object({
+  steps: z.array(playbookStepSchema).min(1, "Add at least one step").max(30),
+});
