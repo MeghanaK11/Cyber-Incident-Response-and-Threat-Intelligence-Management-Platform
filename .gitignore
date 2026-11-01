@@ -1,0 +1,16 @@
+node_modules/
+.next/
+out/
+build/
+coverage/
+.env
+.env.local
+.env.*.local
+*.log
+.DS_Store
+.vscode/
+.idea/
+# transformers.js model cache
+.cache/
+next-env.d.ts
+*.tsbuildinfo
