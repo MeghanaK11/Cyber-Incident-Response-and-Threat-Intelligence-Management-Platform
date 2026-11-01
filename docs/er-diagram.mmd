@@ -1,0 +1,126 @@
+erDiagram
+    ROLES ||--o{ USERS : "has"
+    USERS ||--o{ INCIDENTS : "reports"
+    USERS |o--o{ INCIDENTS : "is assigned"
+    USERS |o--o{ INCIDENT_TASKS : "works on"
+    USERS |o--o{ PLAYBOOKS : "creates"
+    USERS |o--o{ AUDIT_LOG : "performs"
+
+    SEVERITY_SLA ||--o{ INCIDENTS : "sets deadlines for"
+    INCIDENT_STATUS_TRANSITIONS }o--o{ INCIDENTS : "governs"
+    INCIDENTS ||--o{ INCIDENT_STATUS_HISTORY : "has"
+    INCIDENTS ||--o{ INCIDENT_ASSETS : "involves"
+    ASSETS ||--o{ INCIDENT_ASSETS : "involved in"
+    INCIDENTS ||--o{ INCIDENT_TASKS : "has"
+    PLAYBOOKS ||--|{ PLAYBOOK_STEPS : "contains"
+    PLAYBOOK_STEPS |o--o{ INCIDENT_TASKS : "generates"
+    INCIDENTS ||--o| INCIDENT_EMBEDDINGS : "embedded as"
+
+    ROLES {
+        smallint role_id PK
+        varchar role_name UK
+        varchar description
+    }
+    USERS {
+        int user_id PK
+        varchar full_name
+        citext email UK
+        char password_hash "bcrypt"
+        smallint role_id FK
+        boolean is_active
+        timestamptz created_at
+        timestamptz last_login_at
+    }
+    ASSETS {
+        int asset_id PK
+        varchar hostname UK
+        inet ip_address UK
+        varchar asset_type
+        varchar operating_system
+        varchar department
+        smallint criticality "1-5"
+        boolean is_internet_facing
+    }
+    SEVERITY_SLA {
+        enum severity PK
+        interval respond_within
+        interval resolve_within
+    }
+    INCIDENT_STATUS_TRANSITIONS {
+        enum from_status PK
+        enum to_status PK
+    }
+    INCIDENTS {
+        int incident_id PK
+        varchar reference_code UK
+        varchar title
+        text description
+        enum category
+        enum severity FK
+        enum status
+        int reported_by FK
+        int assigned_to FK
+        char source_alert_id UK "MongoDB ObjectId"
+        timestamptz detected_at
+        timestamptz respond_by
+        timestamptz resolve_by
+        timestamptz resolved_at
+        text resolution_summary
+        tsvector search_tsv
+    }
+    INCIDENT_ASSETS {
+        int incident_id PK, FK
+        int asset_id PK, FK
+        varchar impact
+    }
+    INCIDENT_STATUS_HISTORY {
+        bigint history_id PK
+        int incident_id FK
+        enum old_status
+        enum new_status
+        int changed_by FK
+        timestamptz changed_at
+        varchar note
+    }
+    PLAYBOOKS {
+        int playbook_id PK
+        varchar name UK
+        enum category
+        text description
+        boolean is_active
+        int created_by FK
+    }
+    PLAYBOOK_STEPS {
+        int playbook_id PK, FK
+        smallint step_no PK
+        varchar title
+        text instructions
+        int expected_minutes
+    }
+    INCIDENT_TASKS {
+        int task_id PK
+        int incident_id FK
+        int playbook_id FK
+        smallint step_no FK
+        varchar title
+        varchar status
+        int assigned_to FK
+        timestamptz due_at
+        timestamptz completed_at
+    }
+    AUDIT_LOG {
+        bigint audit_id PK
+        varchar table_name
+        varchar record_id
+        varchar action
+        int actor_id FK
+        jsonb old_data
+        jsonb new_data
+    }
+    INCIDENT_EMBEDDINGS {
+        int incident_id PK, FK
+        vector embedding "384-d"
+        varchar model_name
+        char content_hash
+        boolean is_stale
+    }
