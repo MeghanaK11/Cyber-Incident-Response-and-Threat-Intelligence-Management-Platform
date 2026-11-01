@@ -42,11 +42,33 @@ npm run dev                                          # http://localhost:3000
 
 Sign in as the admin, then add analysts and viewers from the Users page.
 
+### Demo data
+
+```bash
+npm run seed
+```
+
+This adds four analysts and a viewer (passwords are printed once), 16 assets, 8 response playbooks based on the NIST SP 800-61 phases, and about six months of incidents. Each incident is driven through the real workflow (stored procedures, triggers, status transitions) with historical timestamps, so SLAs, history and the dashboard behave as they would in use. Attacker IPs come from the RFC 5737 documentation ranges. The seed only runs on an empty incidents table.
+
+The seed also embeds every incident for semantic search. The first run downloads the embedding model (about 90 MB) into `.cache/`. If you add incidents another way, `npm run embed` fills in any missing vectors.
+
 | Role | Can do |
 |---|---|
 | Admin | Everything, plus users, reassigning to anyone, deleting incidents |
 | Analyst | Report and work incidents, take or auto-assign, apply playbooks, manage tasks |
 | Viewer | Read-only access to dashboard and incidents |
+
+## Semantic search with pgvector
+
+| Question | Answer |
+|---|---|
+| What is embedded | Incident title, description and resolution summary |
+| Model | sentence-transformers/all-MiniLM-L6-v2 (ONNX), 384 dimensions, run locally in the Node server with transformers.js |
+| Storage | `incident_embeddings.embedding VECTOR(384)`, one row per incident, with a SHA-256 of the embedded text |
+| Index | HNSW, `vector_cosine_ops` |
+| Similarity | Cosine: `1 - (a <=> b)` |
+| Retrieval | `fn_similar_incidents()` for "similar past incidents" on each incident page; free-text search by meaning on the Incidents page |
+| Keeping it fresh | A trigger marks the vector stale when the incident text changes; the app re-embeds it after the write |
 
 ## Database tests
 
@@ -62,9 +84,9 @@ Each script runs in a transaction and rolls back, so the database is left unchan
 
 ```
 db/postgres/      schema, triggers, procedures, views (run in name order)
-db/tests/         SQL test scripts
+db/tests/         SQL test scripts (41 checks)
 docs/             ER diagram
-scripts/          create-admin
+scripts/          create-admin, seed and embed
 src/proxy.ts      blocks every page and API route without a valid session
 src/lib/          db pool and transactions, auth, validation, error mapping
 src/server/       all SQL the app runs, grouped by feature
