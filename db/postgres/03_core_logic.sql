@@ -430,3 +430,36 @@ SELECT date_trunc('month', i.created_at)::DATE AS month,
            AS pct_resolved_late
 FROM incidents i
 GROUP BY 1, 2;
+
+-- Overall threat posture for the dashboard. Each open incident adds weight by
+-- severity, plus 3 if it has blown its SLA. Any open CRITICAL lifts the floor.
+--   GUARDED < 8 <= ELEVATED < 20 <= HIGH < 40 <= SEVERE
+CREATE OR REPLACE FUNCTION fn_threat_posture()
+RETURNS TABLE (score INT, level TEXT, level_rank INT,
+               open_incidents INT, open_critical INT, open_breached INT)
+LANGUAGE sql STABLE AS $$
+    WITH open_now AS (
+        SELECT severity, now() > resolve_by AS breached
+        FROM incidents
+        WHERE status NOT IN ('RESOLVED', 'CLOSED')
+    ), totals AS (
+        SELECT COALESCE(SUM(CASE severity WHEN 'CRITICAL' THEN 8 WHEN 'HIGH' THEN 4
+                                          WHEN 'MEDIUM' THEN 2 ELSE 1 END
+                            + CASE WHEN breached THEN 3 ELSE 0 END), 0)::INT AS score,
+               count(*)::INT                                        AS open_incidents,
+               (count(*) FILTER (WHERE severity = 'CRITICAL'))::INT AS open_critical,
+               (count(*) FILTER (WHERE breached))::INT              AS open_breached
+        FROM open_now
+    ), ranked AS (
+        SELECT t.*,
+               CASE WHEN t.score >= 40 OR t.open_critical >= 3 THEN 4
+                    WHEN t.score >= 20 OR t.open_critical >= 1 THEN 3
+                    WHEN t.score >= 8 THEN 2
+                    ELSE 1 END AS level_rank
+        FROM totals t
+    )
+    SELECT score,
+           (ARRAY['GUARDED', 'ELEVATED', 'HIGH', 'SEVERE'])[level_rank],
+           level_rank, open_incidents, open_critical, open_breached
+    FROM ranked
+$$;

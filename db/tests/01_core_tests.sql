@@ -212,6 +212,9 @@ SELECT pg_temp.check(
 SELECT pg_temp.check(
     (SELECT count(*) >= 2 FROM v_incident_monthly_stats),
     'V2 monthly stats view returns one row per month/category');
+SELECT pg_temp.check(
+    (SELECT level = 'HIGH' AND open_critical = 2 AND score = 16 FROM fn_threat_posture()),
+    'V3 two open CRITICAL incidents (score 16) put threat posture at HIGH');
 
 \echo '--- Vector similarity'
 INSERT INTO incident_embeddings (incident_id, embedding, model_name, content_hash) VALUES
