@@ -1,79 +1,55 @@
 @import "tailwindcss";
 
-/* Night-ops console. Colour is reserved for severity and state; everything
-   else lives in a narrow band of ink blues so the heat colours read instantly. */
+/* CIRT — White & Olive enterprise design system */
 @theme {
-  --color-surface: #08111f;   /* page */
-  --color-panel: #0d1a2d;     /* raised areas */
-  --color-panel-2: #12233b;   /* hover, inputs */
-  --color-line: #1b2c45;      /* rules and borders */
-  --color-line-2: #26405f;    /* stronger borders, focus rings */
-  --color-ink: #dce6f2;       /* primary text */
-  --color-ink-2: #93a4bd;     /* secondary text */
-  --color-ink-3: #62769a;     /* muted text */
-  --color-accent: #59b2ff;    /* links, primary actions */
-  --color-accent-dark: #2f86d8;
-
-  /* severity heat scale, cool to hot */
-  --color-sev-1: #6b8fbf;     /* low */
-  --color-sev-2: #e3b341;     /* medium */
-  --color-sev-3: #f0803c;     /* high */
-  --color-sev-4: #f2385a;     /* critical */
-
-  /* state, always paired with a text label */
-  --color-good: #3fb950;
-  --color-warn: #e3b341;
-  --color-critical: #f2385a;
-
+  --color-surface: #F6F7F2;
+  --color-panel: #FFFFFF;
+  --color-panel-2: #F0F3EC;
+  --color-line: #E1E6DC;
+  --color-line-2: #CBD5C5;
+  --color-ink: #252C24;
+  --color-ink-2: #687264;
+  --color-ink-3: #899283;
+  --color-accent: #718568;
+  --color-accent-dark: #586B50;
+  --color-sev-1: #82977F;
+  --color-sev-2: #B58A4A;
+  --color-sev-3: #D18B57;
+  --color-sev-4: #C45E59;
+  --color-good: #64866B;
+  --color-warn: #B58A4A;
+  --color-critical: #C45E59;
   --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Chakra Petch", "IBM Plex Sans", ui-sans-serif, sans-serif;
+  --font-display: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
-
   --animate-meter: meter-fill 900ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
-
-@keyframes meter-fill {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
-}
-
-html { color-scheme: dark; }
+@keyframes meter-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes cirt-enter { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+html { color-scheme: light; scroll-behavior: smooth; }
 html, body { background: var(--color-surface); color: var(--color-ink); }
-body {
-  font-size: 15px;
-  /* faint plotting grid, like the face of a radar console */
-  background-image:
-    linear-gradient(rgba(89, 130, 190, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(89, 130, 190, 0.045) 1px, transparent 1px);
-  background-size: 40px 40px;
-  background-attachment: fixed;
-}
-
-::selection { background: rgba(89, 178, 255, 0.3); }
-
-:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation: none !important; transition: none !important; }
-}
-
-@utility btn {
-  @apply inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md px-3.5 py-2 text-[14px] font-medium
-         transition-colors disabled:cursor-not-allowed disabled:opacity-50;
-}
-
+body { font-size: 14px; background-image: radial-gradient(ellipse at 12% 0%, rgba(113,133,104,.055), transparent 42%); background-attachment: fixed; }
+::selection { background: rgba(113,133,104,.22); color: #20271E; }
+:focus-visible { outline: 2px solid #8A9B7D; outline-offset: 3px; }
+* { scrollbar-width: thin; scrollbar-color: #B8C2B1 #F0F3EC; }
+*::-webkit-scrollbar { width: 9px; height: 9px; }
+*::-webkit-scrollbar-track { background: #F0F3EC; }
+*::-webkit-scrollbar-thumb { background: #B8C2B1; border: 2px solid #F0F3EC; border-radius: 99px; }
+@media (prefers-reduced-motion: no-preference) { main > div > * { animation: cirt-enter .38s ease-out both; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+@utility btn { @apply inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-3.5 py-2 text-[13px] font-medium transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50; }
 @layer components {
-  .input {
-    @apply w-full rounded-md border border-line bg-panel-2 px-3 py-2 text-[15px] text-ink outline-none
-           placeholder:text-ink-3 focus:border-accent focus:ring-2 focus:ring-accent/25;
-  }
+  .input { @apply w-full rounded-lg border border-line bg-panel px-3 py-2.5 text-[14px] text-ink outline-none placeholder:text-ink-3 focus:border-accent focus:ring-2 focus:ring-accent/20 transition-colors; }
   select.input { @apply pr-8; }
-  .label { @apply mb-1.5 block text-[13px] font-medium text-ink-2; }
-  .btn-primary { @apply btn bg-accent text-[#04101f] hover:bg-[#7cc3ff]; }
-  .btn-ghost { @apply btn border border-line-2 bg-transparent text-ink hover:bg-panel-2; }
-  .btn-danger { @apply btn border border-critical/50 bg-transparent text-critical hover:bg-critical/10; }
-  .section-title { @apply font-display text-[15px] font-semibold tracking-wide text-ink; }
-  .panel { @apply rounded-lg border border-line bg-panel/80; }
-  .page-title { @apply font-display text-[28px] font-semibold leading-tight tracking-wide text-ink; }
-  .code { @apply font-mono text-[12.5px] text-ink-2; }
+  .label { @apply mb-1.5 block text-[12px] font-medium tracking-wide text-ink-2; }
+  .btn-primary { @apply btn bg-accent text-white hover:bg-[#5F7456] hover:-translate-y-px active:translate-y-0; }
+  .btn-ghost { @apply btn border border-line bg-panel text-ink-2 hover:border-line-2 hover:bg-panel-2 hover:text-ink; }
+  .btn-danger { @apply btn border border-critical/40 bg-critical/5 text-critical hover:bg-critical/10; }
+  .section-title { @apply font-display text-[14px] font-semibold tracking-wide text-ink; }
+  .panel { @apply rounded-xl border border-line bg-panel; }
+  .page-title { @apply font-display text-[26px] font-semibold leading-tight tracking-[-0.03em] text-ink; }
+  .code { @apply font-mono text-[12px] text-ink-2; }
 }
+a, button { -webkit-tap-highlight-color: transparent; }
+button, [role="button"] { transition-duration: 180ms; }
+.panel, [class*="rounded-lg"][class*="border"] { box-shadow: 0 1px 2px rgba(34,45,31,.035); }

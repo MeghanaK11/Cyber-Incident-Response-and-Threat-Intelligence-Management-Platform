@@ -13,7 +13,7 @@ type Asset = {
 
 const TYPES = ["SERVER", "WORKSTATION", "NETWORK_DEVICE", "CLOUD_INSTANCE", "DATABASE", "APPLICATION", "IOT"];
 const EMPTY = { hostname: "", ip_address: "", asset_type: "SERVER", operating_system: "", department: "", criticality: "3", is_internet_facing: false };
-const CRIT_COLOR = ["", "#6b8fbf", "#6b8fbf", "#e3b341", "#f0803c", "#f2385a"];
+const CRIT_COLOR = ["", "#82977F", "#82977F", "#B99A64", "#D18B57", "#CF6F68"];
 
 export default function AssetsPage() {
   const user = useUser();
@@ -161,7 +161,7 @@ export default function AssetsPage() {
                 <td className="py-3 pr-4">
                   <span className="flex items-center gap-1" title={`Criticality ${a.criticality} of 5`}>
                     {[1, 2, 3, 4, 5].map((n) => (
-                      <span key={n} className="h-2.5 w-2.5 rounded-[2px]" style={{ background: n <= a.criticality ? CRIT_COLOR[a.criticality] : "#1b2c45" }} />
+                      <span key={n} className="h-2.5 w-2.5 rounded-[2px]" style={{ background: n <= a.criticality ? CRIT_COLOR[a.criticality] : "#E1E6DC" }} />
                     ))}
                     <span className="ml-1.5 text-[12px] text-ink-3">{a.criticality}</span>
                   </span>

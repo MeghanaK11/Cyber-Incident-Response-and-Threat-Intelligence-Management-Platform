@@ -16,7 +16,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <UserProvider user={user}>
       <div className="flex min-h-screen">
         <Nav posture={posture} />
-        <main className="min-w-0 flex-1 px-10 py-9">
+        <main className="min-w-0 flex-1 px-6 py-7 sm:px-8 lg:px-10 lg:py-9">
           <div className="mx-auto max-w-[1280px]">{children}</div>
         </main>
       </div>

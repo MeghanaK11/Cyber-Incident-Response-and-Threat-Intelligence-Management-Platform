@@ -21,7 +21,7 @@ type Dashboard = {
 };
 
 const SEV_ORDER = ["CRITICAL", "HIGH", "MEDIUM", "LOW"];
-const SEV_COLOR: Record<string, string> = { CRITICAL: "#f2385a", HIGH: "#f0803c", MEDIUM: "#e3b341", LOW: "#6b8fbf" };
+const SEV_COLOR: Record<string, string> = { CRITICAL: "#CF6F68", HIGH: "#D18B57", MEDIUM: "#B99A64", LOW: "#82977F" };
 
 export default function DashboardPage() {
   const [data, setData] = useState<Dashboard | null>(null);

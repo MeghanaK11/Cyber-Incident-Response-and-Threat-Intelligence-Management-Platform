@@ -9,10 +9,10 @@ export type Posture = {
 };
 
 export const POSTURE_LEVELS = [
-  { level: "GUARDED", label: "Guarded", color: "#6b8fbf", text: "Routine activity. No critical incidents open." },
-  { level: "ELEVATED", label: "Elevated", color: "#e3b341", text: "Several incidents in progress. Watch the queue." },
-  { level: "HIGH", label: "High", color: "#f0803c", text: "A critical incident or SLA breaches need attention." },
-  { level: "SEVERE", label: "Severe", color: "#f2385a", text: "Multiple critical incidents. All hands on the queue." },
+  { level: "GUARDED", label: "Guarded", color: "#8fa18a", text: "Routine activity. No critical incidents open." },
+  { level: "ELEVATED", label: "Elevated", color: "#b99a64", text: "Several incidents in progress. Watch the queue." },
+  { level: "HIGH", label: "High", color: "#d18b57", text: "A critical incident or SLA breaches need attention." },
+  { level: "SEVERE", label: "Severe", color: "#cf6f68", text: "Multiple critical incidents. All hands on the queue." },
 ] as const;
 
 export function postureInfo(level: string) {

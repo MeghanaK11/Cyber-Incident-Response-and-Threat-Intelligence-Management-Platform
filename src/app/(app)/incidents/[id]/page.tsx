@@ -33,7 +33,7 @@ type Similar = {
 };
 type Act = (fn: () => Promise<unknown>, msg?: string) => Promise<boolean>;
 
-const IMPACT_COLOR: Record<string, string> = { TARGETED: "#93a4bd", AFFECTED: "#e3b341", COMPROMISED: "#f2385a" };
+const IMPACT_COLOR: Record<string, string> = { TARGETED: "#82977F", AFFECTED: "#B99A64", COMPROMISED: "#CF6F68" };
 
 export default function IncidentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
