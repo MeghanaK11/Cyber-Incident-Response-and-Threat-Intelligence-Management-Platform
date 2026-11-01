@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { api, fmtDate, humanize } from "@/lib/client";
 import { useUser } from "@/components/UserContext";
 import { useMeta } from "@/components/useMeta";
+import { Flash } from "@/components/Badges";
 
 type U = {
   user_id: number; full_name: string; email: string; role: string; is_active: boolean;
@@ -50,15 +51,13 @@ export default function UsersPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Users</h1>
-        <p className="text-ink-2">Passwords are hashed with bcrypt before they reach the database.</p>
+        <h1 className="page-title">Users</h1>
+        <p className="mt-1 text-ink-2">Passwords are hashed with bcrypt before they reach the database.</p>
       </div>
 
-      {msg && (
-        <p role="status" className={`rounded-md px-3 py-2 text-[14px] ${msg.ok ? "bg-good/10 text-[#087008]" : "bg-critical/8 text-critical"}`}>{msg.text}</p>
-      )}
+      <Flash msg={msg} />
 
-      <form onSubmit={create} className="grid items-end gap-3 border-y border-line py-5 md:grid-cols-5">
+      <form onSubmit={create} className="panel grid items-end gap-3 p-5 md:grid-cols-5">
         <div>
           <label className="label" htmlFor="n">Full name</label>
           <input id="n" className="input" required minLength={2} value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
@@ -82,7 +81,7 @@ export default function UsersPage() {
       </form>
 
       <table className="w-full text-[14px]">
-        <thead className="border-b border-line text-left text-[12px] text-ink-3">
+        <thead className="border-b border-line-2 text-left text-[12px] text-ink-3">
           <tr>
             <th className="py-2 font-medium">Name</th>
             <th className="py-2 font-medium">Email</th>

@@ -36,7 +36,10 @@ export function fmtRelative(v: string | null | undefined): string {
   return diff >= 0 ? `in ${text}` : `${text} ago`;
 }
 
+const SPECIAL: Record<string, string> = { DDOS: "DDoS", IOT: "IoT" };
+
 export function humanize(v: string | null | undefined): string {
   if (!v) return "";
+  if (SPECIAL[v]) return SPECIAL[v];
   return v.charAt(0) + v.slice(1).toLowerCase().replace(/_/g, " ");
 }

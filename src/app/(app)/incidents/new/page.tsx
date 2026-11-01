@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { api, humanize } from "@/lib/client";
 import { canWrite, useUser } from "@/components/UserContext";
 import { useMeta } from "@/components/useMeta";
+import { Flash } from "@/components/Badges";
 
 function localNow() {
   const d = new Date();
@@ -60,8 +61,8 @@ export default function NewIncidentPage() {
   return (
     <form onSubmit={submit} className="max-w-3xl space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Report an incident</h1>
-        <p className="text-ink-2">Deadlines are set from the severity you pick and restart if severity changes later.</p>
+        <h1 className="page-title">Report an incident</h1>
+        <p className="mt-1 text-ink-2">Deadlines are set from the severity you pick and restart if severity changes later.</p>
       </div>
 
       <div>
@@ -107,16 +108,16 @@ export default function NewIncidentPage() {
       <div>
         <span className="label">Affected assets</span>
         {meta && meta.assets.length === 0 && <p className="text-[14px] text-ink-3">No assets registered yet.</p>}
-        <div className="max-h-64 divide-y divide-line overflow-y-auto rounded-md border border-line bg-panel">
+        <div className="max-h-72 divide-y divide-line overflow-y-auto rounded-md border border-line bg-panel">
           {meta?.assets.map((a) => {
             const picked = assets.find((x) => x.asset_id === a.asset_id);
             return (
               <div key={a.asset_id} className="flex items-center gap-3 px-3 py-2">
                 <input type="checkbox" id={`asset-${a.asset_id}`} checked={!!picked} onChange={() => toggleAsset(a.asset_id)} />
                 <label htmlFor={`asset-${a.asset_id}`} className="flex-1 cursor-pointer">
-                  <span className="font-mono text-[13px]">{a.hostname}</span>
+                  <span className="code text-ink">{a.hostname}</span>
                   <span className="ml-2 text-[12px] text-ink-3">
-                    {a.ip_address ?? "no IP"} · {humanize(a.asset_type)} · {a.department} · criticality {a.criticality}
+                    {a.ip_address ?? "no IP"}, {humanize(a.asset_type)}, {a.department}, criticality {a.criticality}
                   </span>
                 </label>
                 {picked && (
@@ -138,7 +139,7 @@ export default function NewIncidentPage() {
         Assign automatically to the analyst with the lightest workload
       </label>
 
-      {error && <p className="text-critical" role="alert">{error}</p>}
+      <Flash msg={error ? { ok: false, text: error } : null} />
 
       <div className="flex gap-3">
         <button className="btn-primary" disabled={busy}>{busy ? "Saving..." : "Create incident"}</button>

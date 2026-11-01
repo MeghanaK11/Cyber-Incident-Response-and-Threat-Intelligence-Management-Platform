@@ -1,7 +1,9 @@
 import { query, queryOne } from "@/lib/db";
 
 export async function getDashboard() {
-  const [kpis, bySeverity, byStatus, monthly, workload, recurring, hotAssets, atRisk] = await Promise.all([
+  const [posture, kpis, bySeverity, byStatus, monthly, workload, recurring, hotAssets, atRisk, activity] = await Promise.all([
+    queryOne(`SELECT * FROM fn_threat_posture()`),
+
     // Headline numbers: aggregates with FILTER
     queryOne(
       `SELECT count(*) FILTER (WHERE status NOT IN ('RESOLVED', 'CLOSED'))::INT AS open_incidents,
@@ -76,9 +78,22 @@ export async function getDashboard() {
         ORDER BY resolve_by
         LIMIT 8`,
     ),
+
+    // Latest status changes across all incidents
+    query(
+      `SELECT h.history_id, h.old_status, h.new_status, h.changed_at, h.note,
+              u.full_name AS changed_by_name, i.incident_id, i.reference_code, i.title, i.severity
+         FROM incident_status_history h
+         JOIN incidents i  ON i.incident_id = h.incident_id
+         LEFT JOIN users u ON u.user_id = h.changed_by
+        ORDER BY h.changed_at DESC, h.history_id DESC
+        LIMIT 7`,
+    ),
   ]);
 
   return {
+    posture,
+    activity,
     kpis,
     by_severity: bySeverity,
     by_status: byStatus,
