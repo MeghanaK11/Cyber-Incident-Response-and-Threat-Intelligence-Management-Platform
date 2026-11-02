@@ -44,7 +44,7 @@ function LoginForm() {
         <input id="password" type="password" autoComplete="current-password" required className="input"
                value={password} onChange={(e) => setPassword(e.target.value)} />
       </div>
-      {error && <p className="text-[14px] text-[#ff8da1]" role="alert">{error}</p>}
+      {error && <p className="text-[14px] text-[#A13E3A]" role="alert">{error}</p>}
       <button className="btn-primary w-full py-2.5" disabled={busy}>{busy ? "Signing in..." : "Sign in"}</button>
     </form>
   );
