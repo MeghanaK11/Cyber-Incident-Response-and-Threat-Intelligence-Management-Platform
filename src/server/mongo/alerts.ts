@@ -17,6 +17,16 @@ export type NewRawAlert = Omit<RawAlert, "_id" | "receivedAt"> & {
   receivedAt?: Date;
 };
 
+export interface AlertSeveritySummary {
+  severity: RawAlert["severity"];
+  count: number;
+}
+
+export interface AlertSourceSummary {
+  source: string;
+  count: number;
+}
+
 async function getAlertsCollection(): Promise<Collection<RawAlert>> {
   const db = await getMongoDb();
   return db.collection<RawAlert>("raw_alerts");
@@ -71,4 +81,54 @@ export async function getAlertById(
   const collection = await getAlertsCollection();
 
   return collection.findOne({ _id: new ObjectId(id) });
+}
+
+// MongoDB aggregation: count alerts grouped by severity.
+export async function getAlertSeveritySummary(): Promise<
+  AlertSeveritySummary[]
+> {
+  const collection = await getAlertsCollection();
+
+  return collection.aggregate<{
+    _id: RawAlert["severity"];
+    count: number;
+  }>([
+    {
+      $group: {
+        _id: "$severity",
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $sort: { count: -1 },
+    },
+  ]).map((result) => ({
+    severity: result._id,
+    count: result.count,
+  })).toArray();
+}
+
+// MongoDB aggregation: count alerts grouped by source.
+export async function getAlertSourceSummary(): Promise<
+  AlertSourceSummary[]
+> {
+  const collection = await getAlertsCollection();
+
+  return collection.aggregate<{
+    _id: string;
+    count: number;
+  }>([
+    {
+      $group: {
+        _id: "$source",
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $sort: { count: -1 },
+    },
+  ]).map((result) => ({
+    source: result._id,
+    count: result.count,
+  })).toArray();
 }

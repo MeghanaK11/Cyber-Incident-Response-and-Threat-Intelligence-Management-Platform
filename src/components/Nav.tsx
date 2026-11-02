@@ -12,6 +12,8 @@ const LINKS = [
   { href: "/incidents", label: "Incidents", icon: "M12 3 2 20h20L12 3zm0 6v5m0 3v.5" },
   { href: "/assets", label: "Assets", icon: "M4 5h16v10H4zM8 19h8M12 15v4" },
   { href: "/playbooks", label: "Playbooks", icon: "M6 3h10l3 3v15H6zM9 9h7M9 13h7M9 17h4" },
+  { href: "/alerts", label: "Security Alerts", icon: "M12 3 2 20h20L12 3zm0 6v5m0 3v.5" },
+  { href: "/threat-intelligence", label: "Threat Intelligence", icon: "M12 3v18m-9-9h18M5.6 5.6l12.8 12.8m0-12.8L5.6 18.4" },
 ];
 const ADMIN_LINKS = [{ href: "/admin/users", label: "Users", icon: "M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm-6 10a6 6 0 0 1 12 0M17 11a3 3 0 1 0 0-6M21 21a5 5 0 0 0-4-4.9" }];
 
