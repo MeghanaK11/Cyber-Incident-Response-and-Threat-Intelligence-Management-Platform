@@ -40,6 +40,23 @@ export const userCreateSchema = z.object({
   password,
 });
 
+// Public sign-up. No role field: everyone who signs up starts as a Viewer.
+// Public sign-up. Viewer and Analyst can be chosen freely; Admin also needs the
+// admin code from .env (ADMIN_SIGNUP_CODE), checked in the sign-up route.
+export const signupSchema = z
+  .object({
+    full_name: z.string().trim().min(2, "Name must be at least 2 characters").max(100),
+    email: z.string().trim().toLowerCase().email("Enter a valid email address").max(254),
+    role: z.enum(ROLES).default("VIEWER"),
+    admin_code: z.string().max(200).optional(),
+    password,
+    confirm_password: z.string(),
+  })
+  .refine((v) => v.password === v.confirm_password, {
+    message: "Passwords do not match",
+    path: ["confirm_password"],
+  });
+
 export const userUpdateSchema = z
   .object({
     full_name: z.string().trim().min(2).max(100).optional(),

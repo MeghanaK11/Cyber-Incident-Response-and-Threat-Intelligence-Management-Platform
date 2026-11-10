@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { query, queryOne, withTransaction } from "@/lib/db";
+import { getPool, query, queryOne, withTransaction } from "@/lib/db";
 import { HttpError } from "@/lib/http";
 import { hashPassword, verifyPassword, type CurrentUser } from "@/lib/auth";
 import type { Role } from "@/lib/session";
@@ -72,6 +72,30 @@ export async function createUser(
     );
     return rows[0];
   });
+}
+
+/** Public sign-up. The role is always VIEWER; only an admin can raise it later. */
+/** Public sign-up. The sign-up route has already checked the admin code if role is ADMIN. */
+export async function registerUser(input: { full_name: string; email: string; password: string; role: Role }) {
+  const hash = await hashPassword(input.password);
+  const client = await getPool().connect();
+  try {
+    await client.query("BEGIN");
+    const { rows } = await client.query<{ user_id: number; full_name: string; email: string; role: Role }>(
+      `INSERT INTO users (full_name, email, password_hash, role_id)
+       SELECT $1, $2, $3, role_id FROM roles WHERE role_name = $4
+       RETURNING user_id, full_name, email::TEXT AS email, $4::TEXT AS role`,
+      [input.full_name, input.email, hash, input.role],
+    );
+    await client.query(`UPDATE users SET last_login_at = now() WHERE user_id = $1`, [rows[0].user_id]);
+    await client.query("COMMIT");
+    return rows[0];
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 export async function updateUser(
