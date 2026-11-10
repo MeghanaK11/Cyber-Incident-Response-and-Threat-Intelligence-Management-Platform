@@ -2,12 +2,14 @@
   "name": "cirt-platform",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
+    "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "tsc --noEmit",
+    "demo": "next build && next start",
     "create-admin": "node --env-file=.env scripts/create-admin.mjs",
+    "reset-password": "node --env-file=.env scripts/reset-password.mjs",
     "seed": "tsx --env-file=.env scripts/seed.ts",
     "embed": "tsx --env-file=.env scripts/embed.ts",
     "mongo:init": "tsx --env-file=.env scripts/init-mongo.ts",
