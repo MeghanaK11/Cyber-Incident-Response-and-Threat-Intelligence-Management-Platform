@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { api, humanize } from "@/lib/client";
+import { usePathname } from "next/navigation";
 import { useUser } from "./UserContext";
+import { RoleBadge, useSignOut } from "./AccountMenu";
 import { Logo } from "./Logo";
 import { postureInfo, type Posture } from "./Posture";
 
@@ -20,13 +20,8 @@ const ADMIN_LINKS = [{ href: "/admin/users", label: "Users", icon: "M9 11a4 4 0 
 export function Nav({ posture }: { posture: Posture | null }) {
   const user = useUser();
   const path = usePathname();
-  const router = useRouter();
+  const signOut = useSignOut();
   const p = postureInfo(posture?.level ?? "GUARDED");
-
-  async function logout() {
-    await api("/api/auth/logout", { method: "POST" });
-    router.replace("/login");
-  }
 
   const item = (l: { href: string; label: string; icon: string }) => {
     const active = path === l.href || path.startsWith(l.href + "/");
@@ -75,8 +70,8 @@ export function Nav({ posture }: { posture: Posture | null }) {
 
       <div className="mt-auto border-t border-[#E1E6DC] px-2 pt-4">
         <div className="truncate text-[14px] text-ink">{user.full_name}</div>
-        <div className="text-[12px] text-ink-3">{humanize(user.role)}</div>
-        <button onClick={logout} className="mt-3 rounded-md text-[12px] text-[#687264] transition-colors hover:text-[#718568]">Sign out</button>
+        <div className="mt-1"><RoleBadge role={user.role} /></div>
+        <button onClick={signOut} className="mt-3 rounded-md text-[12px] text-[#687264] transition-colors hover:text-[#718568]">Sign out</button>
       </div>
     </aside>
   );
