@@ -3,7 +3,7 @@ import { getPool, query, queryOne, withTransaction } from "@/lib/db";
 import { HttpError } from "@/lib/http";
 import { hashPassword, verifyPassword, type CurrentUser } from "@/lib/auth";
 import type { Role } from "@/lib/session";
-
+ 
 type LoginRow = {
   user_id: number;
   full_name: string;
@@ -12,7 +12,7 @@ type LoginRow = {
   password_hash: string;
   is_active: boolean;
 };
-
+ 
 // Hash of a random string, made once per process. Comparing against it when the
 // email is unknown keeps the response time the same, so emails cannot be probed.
 let dummyHash: Promise<string> | null = null;
@@ -20,7 +20,7 @@ function getDummyHash() {
   dummyHash ??= hashPassword(randomBytes(24).toString("hex"));
   return dummyHash;
 }
-
+ 
 export async function authenticate(email: string, password: string) {
   const user = await queryOne<LoginRow>(
     `SELECT u.user_id, u.full_name, u.email::TEXT AS email, r.role_name AS role,
@@ -30,16 +30,16 @@ export async function authenticate(email: string, password: string) {
       WHERE u.email = $1`,
     [email],
   );
-
+ 
   const ok = await verifyPassword(password, user?.password_hash ?? (await getDummyHash()));
   if (!user || !ok || !user.is_active) {
     throw new HttpError(401, "Email or password is incorrect");
   }
-
+ 
   await query(`UPDATE users SET last_login_at = now() WHERE user_id = $1`, [user.user_id]);
   return { user_id: user.user_id, full_name: user.full_name, email: user.email, role: user.role };
 }
-
+ 
 export function listUsers() {
   // LEFT JOIN + subquery so users with zero incidents still appear
   return query(
@@ -57,7 +57,7 @@ export function listUsers() {
       ORDER BY u.is_active DESC, r.role_id, u.full_name`,
   );
 }
-
+ 
 export async function createUser(
   actor: CurrentUser,
   input: { full_name: string; email: string; role: Role; password: string },
@@ -73,9 +73,8 @@ export async function createUser(
     return rows[0];
   });
 }
-
-/** Public sign-up. The role is always VIEWER; only an admin can raise it later. */
-/** Public sign-up. The sign-up route has already checked the admin code if role is ADMIN. */
+ 
+/** Public sign-up. The sign-up route has already checked the role code for Analyst and Admin. */
 export async function registerUser(input: { full_name: string; email: string; password: string; role: Role }) {
   const hash = await hashPassword(input.password);
   const client = await getPool().connect();
@@ -97,7 +96,7 @@ export async function registerUser(input: { full_name: string; email: string; pa
     client.release();
   }
 }
-
+ 
 export async function updateUser(
   actor: CurrentUser,
   id: number,
@@ -106,7 +105,7 @@ export async function updateUser(
   if (id === actor.user_id && (input.is_active === false || (input.role && input.role !== "ADMIN"))) {
     throw new HttpError(400, "You cannot deactivate or demote your own account");
   }
-
+ 
   const sets: string[] = [];
   const params: unknown[] = [];
   if (input.full_name !== undefined) {
@@ -126,7 +125,7 @@ export async function updateUser(
     sets.push(`password_hash = $${params.length}`);
   }
   params.push(id);
-
+ 
   return withTransaction(actor.user_id, async (c) => {
     // A demoted or deactivated analyst must not keep open incidents
     if (input.is_active === false || (input.role && input.role === "VIEWER")) {
@@ -146,3 +145,4 @@ export async function updateUser(
     if (!rowCount) throw new HttpError(404, "User not found");
   });
 }
+ 
